@@ -1,0 +1,14 @@
+[project]
+name = "nonebot-adapter-rocketchat"
+version = "0.1.0"
+description = "nonebot-adapter-rocketchat"
+readme = "README.md"
+requires-python = ">=3.8, <4.0"
+
+[tool.nonebot]
+adapters = [
+    { name = "RocketChat", module_name = "adapters.rocketchat" }
+]
+plugins = []
+plugin_dirs = ["plugins"]
+builtin_plugins = ["echo"]
