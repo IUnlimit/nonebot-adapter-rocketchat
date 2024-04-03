@@ -23,7 +23,8 @@ RC_USERNAME="yourbot.name"
 # Bot password
 RC_PASSWORD="password"
 # RocketChat server url
-RC_SERVER_URL="http://127.0.0.1:3000"
+RC_SERVER_HTTP="http://localhost:3000"
+RC_SERVER_WSS="ws://localhost:3000/websocket"
 # Proxy server (Optional)
 [RC_PROXIES]
 http = "http://127.0.0.1:7890"
@@ -35,3 +36,4 @@ RC_MESSAGE_UPDATE_INTERVAL=0.5
 ## Thanks
 
 - [rocketchat_API](https://github.com/jadolg/rocketchat_API)
+- [RealTime API](https://github.com/hynek-urban/rocketchat-async)
