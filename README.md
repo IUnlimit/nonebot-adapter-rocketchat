@@ -35,5 +35,5 @@ RC_MESSAGE_UPDATE_INTERVAL=0.5
 
 ## Thanks
 
-- [rocketchat_API](https://github.com/jadolg/rocketchat_API)
+- [rocket-python](https://github.com/Pipoline/rocket-python)
 - [RealTime API](https://github.com/hynek-urban/rocketchat-async)

@@ -35,7 +35,7 @@ from .bot import Bot
 from .event import Event, MessageEvent, RoomMessageEvent
 from .config import Config
 from .message import Message, MessageSegment
-from rocketchat_API.rocketchat import RocketChat
+from rocketchat.api import RocketChatAPI
 from .log import success, info, debug, error
 from .realtime import RealTime
 
@@ -46,7 +46,7 @@ class Adapter(BaseAdapter):
     def __init__(self, driver: Driver, **kwargs: Any):
         super().__init__(driver, **kwargs)
         self.adapter_config = get_plugin_config(Config)
-        self.rest_api: RocketChat
+        self.rest_api: RocketChatAPI
         self.listener: Optional[asyncio.Task] = None
         self.room_types = dict()
         # self.last_processed_timestamp = self.get_current_utc_timestamp()
@@ -65,13 +65,13 @@ class Adapter(BaseAdapter):
 
     """定义启动时的操作，例如和平台建立连接"""
     async def startup(self) -> None:
-        self.rest_api = RocketChat(
-            self.adapter_config.rc_username, 
-            self.adapter_config.rc_password, 
-            server_url=str(self.adapter_config.rc_server_http), 
-            proxies=self.adapter_config.rc_proxies)
-        bot_id = self.rest_api.me().json()["username"]
-        # self.listener = asyncio.create_task(self._forward_http(bot))
+        config = self.adapter_config
+        self.rest_api = RocketChatAPI(settings={
+            'username': config.rc_username,
+            'password': config.rc_password,
+            'domain': config.rc_server_http
+        })
+        bot_id = self.rest_api.get_my_info()["username"]
         self.listener = asyncio.create_task(self._forward_ws(bot_id))
 
     async def _forward_ws(self, rest_bot_id: str):
@@ -87,7 +87,11 @@ class Adapter(BaseAdapter):
 
                 for channel_id, channel_type in await realtime.get_channels():
                     # 同类型(stream-room-messages) 注册归注册,只保留最后一个callback
-                    await realtime.subscribe_to_channel_messages(channel_id, channel_type, self._handle_event)
+                    await realtime.subscribe_to_channel_messages(
+                        channel_id, 
+                        channel_type, 
+                        lambda event: asyncio.create_task(bot.handle_event(event)))
+                    
                     info(f"Subscribe channel {channel_id} ({channel_type})")
                     self.room_types[channel_id] = channel_type
                     
@@ -112,14 +116,6 @@ class Adapter(BaseAdapter):
                     self.bot_disconnect(bot)
                     bot = None
             await asyncio.sleep(3)
-
-    # 分发事件
-    def _handle_event(self, event: Event):
-        bot = self.bots[self.adapter_config.rc_username]
-        event.self_id = bot.self_id
-        if isinstance(event, RoomMessageEvent):
-            event.room_type = self.room_types[event.rid]
-        asyncio.create_task(bot.handle_event(event))
 
 
     """定义关闭时的操作，例如停止任务、断开连接"""
