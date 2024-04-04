@@ -11,6 +11,14 @@ class Sender(BaseModel):
     # name
     name: str
 
+class File(BaseModel):
+    # _id
+    _id: str
+    # storage name
+    name: str
+    # file type - image/jpeg
+    type: str
+
 # url 
 class Url(BaseModel):
     url: str
@@ -39,6 +47,8 @@ class Markdown(BaseModel):
     # 消息类型 LINK PLAIN_TEXT
     type: str
     value: Union[str, Dict]
+    # EMOJI
+    shortCode: Optional[str] = None
 
 # md 消息段落
 class Paragraph(BaseModel):
