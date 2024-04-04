@@ -6,7 +6,7 @@ from nonebot.adapters import Event as BaseEvent
 from nonebot.compat import model_dump
 
 from .message import Message
-from .model import Block, Mention, Paragraph, Sender, Url
+from .model import Block, File, Mention, Paragraph, Sender, Url
 
 if TYPE_CHECKING:
     from .bot import Bot
@@ -16,8 +16,10 @@ class Event(BaseEvent):
     # _id
     _id: str
 
+    # 自定义字段
     # 机器人自身 Id, 生成时传入
     self_id: Optional[str] = None
+    to_me: bool = False 
 
     @override
     def get_type(self) -> str:
@@ -55,14 +57,14 @@ class Event(BaseEvent):
     # 判断事件是否和机器人有关
     @override
     def is_tome(self) -> bool:
-        return False
+        return self.to_me
 
 
 # Message
 class MessageEvent(Event):
     """消息事件"""
 
-    # msg 纯文字消息
+    # msg 文本化消息(非纯文字消息, 不一定有值)
     msg: str
     # ts.$date
     # timestamp: int
@@ -79,12 +81,19 @@ class MessageEvent(Event):
     md: Optional[List[Paragraph]] = None
     # t 消息类型
     t: Optional[str] = None
-    # attachments 附加消息内容 如回复的消息
+    # attachments 附加消息内容 如回复的消息 / 带图片的消息
     attachments: Optional[List] = None
     # blocks 消息块
     blocks: Optional[List[Block]] = None
     # groupable
     groupable: Optional[bool] = None
+    # file
+    file: Optional[File] = None
+    # files
+    files: Optional[List[File]] = None
+
+    # 自定义字段
+    message: Optional[Message] = None
 
     @override
     def get_type(self) -> str:
@@ -98,19 +107,11 @@ class MessageEvent(Event):
     @override
     def get_message(self) -> Message:
         # 返回事件消息对应的 NoneBot Message 对象
-        return Message(self.msg)
+        return self.message
 
     @override
     def get_user_id(self) -> str:
         return str(self.u._id)
-    
-    # 判断事件是否和机器人有关
-    @override
-    def is_tome(self) -> bool:
-        for metion in self.mentions:
-            if metion.username == self.self_id:
-                return True
-        return False
 
 
 class RoomMessageEvent(MessageEvent):

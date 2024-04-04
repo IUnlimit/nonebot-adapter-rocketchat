@@ -1,7 +1,9 @@
-from typing import Type, Union, Mapping, Iterable
-from typing_extensions import override
+from typing import List, Optional, Type, Union, Mapping, Iterable
+from typing_extensions import override, Self
 
 from nonebot.adapters import Message as BaseMessage, MessageSegment as BaseMessageSegment
+
+from adapters.rocketchat.model import Paragraph
 
 
 class MessageSegment(BaseMessageSegment["Message"]):
@@ -16,12 +18,33 @@ class MessageSegment(BaseMessageSegment["Message"]):
     # 返回该消息段的纯文本表现形式，通常在日志中展示
     @override
     def __str__(self) -> str:
-        return self.data["value"]
+        return str(self.data["value"])
+
+    @override
+    def __add__(
+        self, other: Union[str, "MessageSegment", Iterable["MessageSegment"]]
+    ) -> "Message":
+        return Message(self) + (
+            MessageSegment.text(other) if isinstance(other, str) else other
+        )
+
+    @override
+    def __radd__(
+        self, other: Union[str, "MessageSegment", Iterable["MessageSegment"]]
+    ) -> "Message":
+        return (
+            MessageSegment.text(other) if isinstance(other, str) else Message(other)
+        ) + self
 
     # 判断该消息段是否为纯文本
     @override
     def is_text(self) -> bool:
-        return self.type == "text"
+        return self.type == "PLAIN_TEXT"
+
+    # TODO builder 方法
+    @classmethod
+    def text(cls, text: str) -> Self:
+        return cls("PLAIN_TEXT", {"value": text})
 
 
 class Message(BaseMessage[MessageSegment]):
@@ -32,9 +55,48 @@ class Message(BaseMessage[MessageSegment]):
     def get_segment_class(cls) -> Type[MessageSegment]:
         return MessageSegment
 
-    # TODO
-    # 实现从字符串中构造消息数组，如无字符串嵌入格式可直接返回文本类型 MessageSegment
+    @override
+    def __add__(
+        self, other: Union[str, MessageSegment, Iterable[MessageSegment]]
+    ) -> Self:
+        return super().__add__(
+            MessageSegment.text(other) if isinstance(other, str) else other
+        )
+
+    # def to_rich_text(self, truncate: Optional[int] = 70) -> str:
+    #     return "".join(seg.to_rich_text(truncate=truncate) for seg in self)
+
+    @override
+    def __radd__(
+        self, other: Union[str, MessageSegment, Iterable[MessageSegment]]
+    ) -> Self:
+        return super().__radd__(
+            MessageSegment.text(other) if isinstance(other, str) else other
+        )
+
+    @override
+    def __iadd__(
+        self, other: Union[str, MessageSegment, Iterable[MessageSegment]]
+    ) -> Self:
+        return super().__iadd__(
+            MessageSegment.text(other) if isinstance(other, str) else other
+        )
+    
+    # 实现从json中构造消息数组，如无字符串嵌入格式可直接返回文本类型 MessageSegment
     @staticmethod
     @override
-    def _construct(msg: str) -> Iterable[MessageSegment]:
-        return [MessageSegment("text", {"value": msg})]
+    def _construct(p_list: Union[List[Paragraph], str]) -> Iterable[MessageSegment]:
+        if p_list is None:
+            return []
+        if isinstance(p_list, str):
+            return [MessageSegment.text(p_list)]
+        segments = []
+        for para in p_list:
+            for md in para.value:
+                # {"type": "PLAIN_TEXT", "value": "你好 "}
+                segments.append(MessageSegment(md.type, {"value": md.value}))
+        return segments
+
+    @override
+    def extract_plain_text(self) -> str:
+        return "".join(str(seg).strip() for seg in self if seg.is_text())
