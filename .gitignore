@@ -162,3 +162,7 @@ cython_debug/
 
 # Custom
 .env.prod
+plugins/
+!plugins/test/
+test/
+log/
