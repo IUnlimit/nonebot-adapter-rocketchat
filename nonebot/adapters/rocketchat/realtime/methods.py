@@ -1,7 +1,7 @@
 import hashlib
 import time
 
-from adapters.rocketchat.log import debug, info, error
+from ..log import debug, info, error
 
 from .dispatcher import Dispatcher
 

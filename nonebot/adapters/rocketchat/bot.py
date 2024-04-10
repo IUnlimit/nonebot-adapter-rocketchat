@@ -81,8 +81,10 @@ class Bot(BaseBot):
         self.attachments 中的消息,后续完善相关解析
         // 如 attachments.description -> msg, attachments.descriptionMd -> md
         """
-        assert event.md is not None
-        event.message = Message().extend(Message._construct(event.md))
+        if not event.md:
+            event.message = Message().append(MessageSegment.text(""))
+        else:
+            event.message = Message().extend(Message._construct(event.md))
 
     def _strip(self, event: MessageEvent):
         """去除首尾部连续的空消息段
@@ -120,7 +122,7 @@ class Bot(BaseBot):
         # direct room
         if event.room_type == "d":
             event.to_me = True
-        elif len(event.mentions) != 0:
+        elif event.mentions and len(event.mentions) != 0:
             # @bot
             for metion in event.mentions:
                 if metion.username == self.self_id:

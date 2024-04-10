@@ -3,7 +3,7 @@ from typing_extensions import override, Self
 
 from nonebot.adapters import Message as BaseMessage, MessageSegment as BaseMessageSegment
 
-from adapters.rocketchat.model import Paragraph
+from .model import Paragraph
 
 
 class MessageSegment(BaseMessageSegment["Message"]):
