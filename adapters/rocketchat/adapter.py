@@ -1,30 +1,12 @@
 import asyncio
-import collections
-import contextlib
-from datetime import datetime, timezone
-import hashlib
-import inspect
-import json
-import signal
-import sys
-import time
-from typing import Any, Dict, Generator, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type
 from typing_extensions import override
 
 from nonebot import get_plugin_config
 from nonebot.exception import WebSocketClosed
-from nonebot.utils import DataclassEncoder, escape_tag
+from nonebot.utils import escape_tag
 from nonebot.drivers import (
-    URL,
     Driver,
-    Request,
-    Response,
-    WebSocket,
-    ForwardDriver,
-    ReverseDriver,
-    HTTPServerSetup,
-    WebSocketServerSetup,
-    HTTPClientMixin,
     WebSocketClientMixin
 )
 
@@ -90,7 +72,7 @@ class Adapter(BaseAdapter):
                     await realtime.subscribe_to_channel_messages(
                         channel_id, 
                         channel_type, 
-                        lambda event: asyncio.create_task(bot.handle_event(event)))
+                        lambda eventJson: asyncio.create_task(bot.handle_event(eventJson))) # type: ignore
                     
                     info(f"Subscribe channel {channel_id} ({channel_type})")
                     self.room_types[channel_id] = channel_type
@@ -100,7 +82,7 @@ class Adapter(BaseAdapter):
                 # 尝试重连
                 error(
                     "<r><bg #f8bbd0>Error while setup websocket to "
-                    f"{escape_tag(config.rc_server_wss)}. Trying to reconnect...</bg #f8bbd0></r>",
+                    f"{escape_tag(str(config.rc_server_wss))}. Trying to reconnect...</bg #f8bbd0></r>",
                     e,
                 )
             except Exception as e:

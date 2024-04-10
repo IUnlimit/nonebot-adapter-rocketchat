@@ -1,10 +1,7 @@
-from functools import partial
 import hashlib
 import time
 
-from nonebot.compat import type_validate_python
-from adapters.rocketchat.event import RoomMessageEvent
-from adapters.rocketchat.log import debug, info
+from adapters.rocketchat.log import debug, info, error
 
 from .dispatcher import Dispatcher
 
@@ -215,11 +212,9 @@ class SubscribeToChannelMessages(RealtimeRequest):
     @staticmethod
     def _wrap(callback):
         def fn(msg):
-            debug(str(msg), None)
+            debug(str(msg), None) # type: ignore
             eventJson = msg["fields"]["args"][0]
-            # info(str(eventJson))
-            event = type_validate_python(RoomMessageEvent, eventJson)
-            return callback(event)
+            callback(eventJson)
         return fn
 
     @classmethod

@@ -1,4 +1,4 @@
-from typing import List, Optional, Type, Union, Mapping, Iterable
+from typing import List, Type, Union, Iterable
 from typing_extensions import override, Self
 
 from nonebot.adapters import Message as BaseMessage, MessageSegment as BaseMessageSegment
@@ -94,7 +94,16 @@ class Message(BaseMessage[MessageSegment]):
         for para in p_list:
             for md in para.value:
                 # {"type": "PLAIN_TEXT", "value": "你好 "}
-                segments.append(MessageSegment(md.type, {"value": md.value}))
+                # {'type': 'EMOJI', 'unicode': '👍'}
+                md_dict = md.__dict__
+                # 删除值为 None 的键值对
+                none_keys = [key for key, value in md_dict.items() if value is None]
+                for key in none_keys:
+                    del md_dict[key]
+                
+                md_type = md_dict["type"]
+                del md_dict["type"]
+                segments.append(MessageSegment(md_type, md_dict))
         return segments
 
     @override

@@ -1,7 +1,5 @@
 from nonebot import get_plugin_config
 from nonebot.plugin import PluginMetadata
-from nonebot import get_plugin_config
-from nonebot.plugin import PluginMetadata
 from nonebot import on_command
 from nonebot.rule import is_type
 from nonebot.permission import SUPERUSER
