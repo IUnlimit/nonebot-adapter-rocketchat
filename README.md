@@ -29,8 +29,6 @@ RC_SERVER_WSS="ws://localhost:3000/websocket"
 [RC_PROXIES]
 http = "http://127.0.0.1:7890"
 https = "https://127.0.0.1:7890"
-# Message update interval (Unit: seconds)
-RC_MESSAGE_UPDATE_INTERVAL=0.5
 ```
 
 ## Thanks
