@@ -1,5 +1,5 @@
 <p align="center"> 
-  <img  src="./docs/images/logo.png" width="200" height="200" alt="nonebot-adapter-rocketchat" />
+  <img  src="https://github.com/IUnlimit/nonebot-adapter-rocketchat/blob/main/docs/images/logo.png?raw=true" width="200" height="200" alt="nonebot-adapter-rocketchat" />
 </p>
 
 <h1 align="center">
@@ -30,6 +30,35 @@ RC_SERVER_WSS="ws://localhost:3000/websocket"
 http = "http://127.0.0.1:7890"
 https = "https://127.0.0.1:7890"
 ```
+
+### REST API
+
+[REST API Endpoints](https://developer.rocket.chat/reference/api/rest-api/endpoints)
+
+```python
+# with plugin listener
+@listener.handle()
+async def handle_function(bot: Bot, event: RoomMessageEvent, msgArgs: Message = CommandArg()):
+  bot.get_rest_api().send_message(f'检索到 {len(hits)} 条用户记录（仅展示一条示例记录）', event.rid, attachments=[{
+            "color": "#00FF00",
+            "text": "[App 用户直接点击即可下载]",
+            # "ts": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            "title": "下载全部检索结果 (15 分钟内有效)",
+            "title_link": get_url,
+            "title_link_download": True,
+            "fields": fields
+        }])
+```
+
+## Support
+
+- [subscriptions](https://developer.rocket.chat/reference/api/realtime-api/subscriptions)
+  - [ ] stream-notify-all
+  - [ ] stream-notify-logged
+  - [ ] stream-notify-room-users
+  - [ ] stream-notify-room
+  - [x] stream-room-messages
+  - [ ] stream-notify-user
 
 ## Thanks
 
